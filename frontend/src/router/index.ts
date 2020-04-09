@@ -55,6 +55,10 @@ export const routes: RouteConfig[] = [
         component: () => import('@/views/inquire/index.vue'),
       },
       {
+        path: '/edit',
+        component: () => import('@/views/register/index.vue'),
+      },
+      {
         path: '/appointment/:id',
         props: true,
         component: () => import('@/views/appointment/index.vue'),

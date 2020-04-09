@@ -96,6 +96,7 @@
                 required
               />
               <v-text-field
+                v-show="!edit"
                 ref="passwordRef"
                 v-model="form.password"
                 label="Lozinka"
@@ -147,7 +148,7 @@
                     $refs.nameRef.valid &&
                     $refs.emailRef.valid &&
                     $refs.yearRef.valid &&
-                    $refs.passwordRef.valid)"
+                    (edit || $refs.passwordRef.valid))"
                   @click="step = 3"
                 >
                   Dalje
@@ -307,12 +308,14 @@
 
 
 <script lang="ts">
+
 import { Component, Vue } from 'vue-property-decorator';
 import { NewDoctor } from '@/model/NewDoctor';
 import DoctorApi from '@/api/DoctorApi';
 import { modalitets, occupations } from '@/utils/data';
 import { isValidEmail, isValidPhoneNumber } from '@/utils/validate';
 import { DoctorData } from '@/model/DoctorData';
+import { UserModule } from '@/store/modules/user';
 
 @Component({
   name: 'Register',
@@ -324,12 +327,22 @@ export default class extends Vue {
 
   private showContinue = false;
 
+  private edit = false;
+
   private form: NewDoctor = {
     doctor: {} as DoctorData,
   } as NewDoctor;
 
   mounted() {
     this.showContinue = true;
+  }
+
+  created() {
+    if (UserModule.doctor.data) {
+      this.edit = true;
+      this.form.doctor = UserModule.doctor.data;
+    }
+    // console.log(this.form);
   }
 
   get hasCertificate() {
@@ -358,46 +371,47 @@ export default class extends Vue {
 
   private rules = {
     securityCode: [
-      (v: string) => !!v || 'Sigurnosni kod obavezan',
+      (v: string) => !!v || 'Sigurnosni kod je obavezan',
     ],
     nameAndSurname: [
       (v: string) => !!v || 'Ime i prezime obavezni',
     ],
     email: [
-      (v: string) => !!v || 'E-mail obavezan',
+      (v: string) => !!v || 'E-mail je obavezan',
       (v: string) => isValidEmail(v) || 'E-mail mora biti validan',
     ],
     password: [
-      (v: string) => !!v || 'Lozinka obavezna',
+      (v: string) => !!v || 'Lozinka je obavezna',
+      (v: string) => (v && v.length >= 5) || 'Lozinka mora imati najmanje 5 karaktera',
     ],
     year: [
-      (v: number) => !!v || 'Godina rodjena obavezna',
+      (v: number) => !!v || 'Godina rodjena je obavezna',
       (v: number) => (v <= 2002 && v >= 1900) || 'Godina rodjena mora biti validna (1900 - 2002)',
     ],
     profession: [
-      (v: number) => !!v || 'Zanimanje obavezno',
+      (v: number) => !!v || 'Zanimanje je obavezno',
     ],
     professionDrugo: [
-      (v: number) => !!v || 'Drugo zanimanje obavezno',
+      (v: number) => !!v || 'Drugo zanimanje je obavezno',
     ],
     professionSpecial: [
-      (v: number) => !!v || 'Vrsta specijalizacije obavezna',
+      (v: number) => !!v || 'Vrsta specijalizacije je obavezna',
     ],
     certificate: [
-      (v: number) => (v >= 0 && v <= 3) || 'Polje obavezno',
+      (v: number) => (v >= 0 && v <= 3) || 'Polje je obavezno',
     ],
     educationYear: [
-      (v: number) => !!v || 'Godine edukacije obavezne',
+      (v: number) => !!v || 'Godine edukacije su obavezne',
       (v: number) => (v <= 20 && v >= 0) || 'Godine edukacije moraju biti validne (0 - 20)',
     ],
     modalitet: [
-      (v: number) => !!v || 'Modalitet obavezan',
+      (v: number) => !!v || 'Modalitet je obavezan',
     ],
     modalitetDrugo: [
-      (v: number) => !!v || 'Modalitet obavezan',
+      (v: number) => !!v || 'Drugi modalitet je obavezan',
     ],
     phoneNumber: [
-      (v: string) => !!v || 'Broj telefona obavezan',
+      (v: string) => !!v || 'Broj telefona je obavezan',
       (v: string) => isValidPhoneNumber(v) || 'Broj telefona mora biti validan: sadrži cifre i znakove: /, ,-',
     ],
   };
