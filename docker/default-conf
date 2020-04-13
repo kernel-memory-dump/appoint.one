@@ -3,13 +3,14 @@ server {
 
   root /usr/share/nginx/html;
 
-  location = /api {
-    return 302 /api/;
-  }
-  location /api/ {
+location ^~ /api/ {
+    proxy_set_header  X-Forwarded-Proto $scheme;
     proxy_pass  http://localhost:8080/;
+}
+
+# index.html on 404
+  error_page  404  /index.html;
+  location / {
+    try_files $uri $uri/ /index.html;
   }
-#  location / {
-#    try_files $uri $uri/ /index.html;
-#  }
 }
